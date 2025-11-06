@@ -1,5 +1,4 @@
-import 'package:helloworld_hellolove/models/scene.dart';
-import 'package:helloworld_hellolove/sets/characters.dart';
+import 'package:helloworld_hellolove/game_scene/scene.dart';
 
 class SceneSets {
   final String name;
@@ -8,22 +7,16 @@ class SceneSets {
   SceneSets({required this.name, required this.scenes});
 }
 
+String dialoguePath = 'assets/dialogue/';
+
 List<SceneSets> getChapters() {
   return [
     SceneSets(
       name: 'Chapter1',
       scenes: [
-        Scene(location: 'Courtyard (Sunset)', characterAtCenter: habaneAkari),
-        Scene(location: 'Courtyard (Sunset)', charactersAtLeft: [habaneAkari]),
-        Scene(location: 'Courtyard (Sunset)', charactersAtRight: [habaneAkari]),
-      ],
-    ),
-    SceneSets(
-      name: 'Chapter2',
-      scenes: [
-        Scene(location: 'Corridor2 (Night)', characterAtCenter: akagiKohaku),
-        Scene(location: 'Corridor2 (Night)', charactersAtLeft: [akagiKohaku]),
-        Scene(location: 'Corridor2 (Night)', charactersAtRight: [akagiKohaku]),
+        Scene('${dialoguePath}c1_s1.txt'),
+        Scene('${dialoguePath}c1_s1.txt'),
+        Scene('${dialoguePath}c1_s1.txt'),
       ],
     ),
   ];

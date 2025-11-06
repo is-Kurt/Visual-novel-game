@@ -1,0 +1,19 @@
+SCENE{ID:1, LOCATION: Courtyard (Sunset),  CHARACTERS: [left(Habane, Akagi), right(Hotaru)]}
+{SAY:Akagi Kohaku,STATE:blushing}:"Hello sadfasdf  asdfasdf asdfasdfas asdfasdf asdfasdfas asdfasdfas  line end
+next line"
+{SAY:Hotaru Yuna,STATE:default}:"Hello sadfasdf  asdfasdf asdfasdfas asdfasdf asdfasdfas asdfasdfas  line end
+next line"
+{SAY:Habane Akari,STATE:disappointed}:"Hello sadfasdf  asdfasdf asdfasdfas asdfasdf asdfasdfas asdfasdfas  line end
+next line"
+{SAY:Hotaru Yuna,STATE:koi}:"Hello sadfasdf  asdfasdf asdfasdfas asdfasdf asdfasdfas asdfasdfas  line end
+next line"
+
+DECISION{1:Yes, 2:No, 1.1:I dont know, 1.2:why}
+
+
+SCENE{ID:2, LOCATION: Corridor2 (Night),  CHARACTERS: [center(Habane)]}
+{SAY:Habane Akari,STATE:concerned}:"Hello sadfasdf  asdfasdf asdfasdfas asdfasdf asdfasdfas asdfasdfas line end
+next line
+third line"
+
+DECISION{1:Yes, 2:No, 1.1:I dont know, 1.2:why}

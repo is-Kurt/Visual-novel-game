@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "homeScreen.tmx",
+    "activeFile": "sceneUI.tmx",
     "expandedProjectPaths": [
         "."
     ],
@@ -18,7 +18,9 @@
             "scaleInEditor": 1
         },
         "exitButton.tsx": {
-            "dynamicWrapping": true
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
         },
         "homeScreen.tmx": {
             "expandedObjectLayers": [
@@ -40,6 +42,14 @@
             "dynamicWrapping": false,
             "scaleInDock": 0.5,
             "scaleInEditor": 0.5
+        },
+        "sceneUI.tmx": {
+            "scale": 0.33,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 851.5151515151513,
+                "y": 472.72727272727263
+            }
         }
     },
     "last.imagePath": "C:/flutter/helloworld_hellolove/assets/images/HUD",
@@ -51,13 +61,16 @@
     "map.tileWidth": 1,
     "map.width": 1920,
     "openFiles": [
-        "homeScreen.tmx",
-        "newGameButton.tsx"
+        "newGameButton.tsx",
+        "sceneUI.tmx",
+        "exitButton.tsx"
     ],
     "project": "helloworld_hellolove.tiled-project",
     "recentFiles": [
-        "homeScreen.tmx",
         "newGameButton.tsx",
+        "exitButton.tsx",
+        "sceneUI.tmx",
+        "homeScreen.tmx",
         "img.tsx",
         "1.tsx"
     ],
