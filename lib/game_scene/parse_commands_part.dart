@@ -57,6 +57,7 @@ extension ParseCommandsPart on Scene {
 
       for (final cmdStr in commandList) {
         final parts = cmdStr.split(':');
+        print(parts);
         if (parts.length == 2) {
           final command = parts[0].trim().toUpperCase();
           final value = parts[1].trim();

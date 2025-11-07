@@ -74,6 +74,7 @@ class Scene extends World with HasGameReference<HelloworldHellolove>, TapCallbac
       } else if (trimmedLine.startsWith('{') && trimmedLine.contains('}:')) {
         if (trimmedLine.endsWith('"')) {
           currentScriptIndex++;
+          print(trimmedLine);
           _scriptLines.add(trimmedLine);
         } else {
           multiLineBuffer = trimmedLine;

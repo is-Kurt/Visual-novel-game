@@ -18,8 +18,13 @@ extension SkipOrAdvanceLogic on Scene {
   }
 
   void _startTyping(String speaker, String text) {
-    _characterSprites[speaker]!.greydOut(false);
-    final fullName = _characterSprites[speaker]!.name;
+    late final fullName;
+    if (speaker.toUpperCase() == 'PLAYER') {
+      fullName = 'PLAYER';
+    } else {
+      _characterSprites[speaker]!.greydOut(false);
+      fullName = _characterSprites[speaker]!.name;
+    }
 
     _fullText = '$fullName: $text';
     _charIndex = 0;

@@ -1,8 +1,10 @@
 // --- POINT 1: The Classroom ---
 SCENE{POINT:1, LOCATION: Classroom1 (Day), CHARACTERS: [right(Hotaru.l)]}
+
 CLEAR
 {SAY:Hotaru, STATE:smile}: "Hey! I was just thinking about you. Today feels like it's going to be a good day, don't you think?"
 {SAY:Hotaru, STATE:koi}: "I was thinking of going to the rooftop for lunch. You should join me!"
+{SAY:PLAYER}: "dasdadsasdasdsdds"
 
 DECISION{1_A: "Sounds great!", 1_B: "I'm not sure..."}
 

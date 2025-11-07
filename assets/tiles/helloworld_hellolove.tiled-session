@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "sceneUI.tmx",
+    "activeFile": "homeScreen.tmx",
     "expandedProjectPaths": [
         "."
     ],
@@ -23,17 +23,19 @@
             "scaleInEditor": 0.5
         },
         "gameHUD.tsx": {
-            "dynamicWrapping": false
+            "dynamicWrapping": false,
+            "scaleInDock": 0.0625,
+            "scaleInEditor": 0.0625
         },
         "homeScreen.tmx": {
             "expandedObjectLayers": [
                 12
             ],
-            "scale": 2,
+            "scale": 0.5,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 960,
-                "y": 1620
+                "x": 416,
+                "y": 686
             }
         },
         "img.tsx": {
@@ -67,16 +69,17 @@
     "map.tileWidth": 1,
     "map.width": 1920,
     "openFiles": [
-        "newGameButton.tsx",
         "sceneUI.tmx",
-        "exitButton.tsx"
+        "homeScreen.tmx",
+        "gameHUD.tsx"
     ],
     "project": "helloworld_hellolove.tiled-project",
     "recentFiles": [
+        "sceneUI.tmx",
+        "gameHUD.tsx",
+        "homeScreen.tmx",
         "newGameButton.tsx",
         "exitButton.tsx",
-        "sceneUI.tmx",
-        "homeScreen.tmx",
         "img.tsx",
         "1.tsx"
     ],
