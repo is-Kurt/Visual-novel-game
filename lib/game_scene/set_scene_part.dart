@@ -2,17 +2,14 @@ part of 'scene.dart';
 
 extension SetSceneLogic on Scene {
   /// Clears old scene and loads new background and characters
-  Future<void> _setScene(
-    String locationName,
-    List<CharacterData> characters,
-  ) async {
+  Future<void> _setScene(String locationName, List<(String, CharacterData)> characters) async {
     if (_backgroundComponent != null) remove(_backgroundComponent!);
     for (final charSprite in _characterSprites.values) {
       remove(charSprite);
     }
     _characterSprites.clear();
 
-    final backgroundSprite = await Sprite.load('locations/$locationName.png');
+    final backgroundSprite = await Sprite.load('locations/$locationName.webp');
     _backgroundComponent = SpriteComponent()
       ..sprite = backgroundSprite
       ..size = HelloworldHellolove.virtualResolution
@@ -22,61 +19,69 @@ extension SetSceneLogic on Scene {
     await _addCharacters(characters);
   }
 
-  Future<void> _addCharacters(List<CharacterData>? characters) async {
-    if (characters != null) {
+  Future<void> _addCharacters(List<(String, CharacterData)> characters) async {
+    if (characters.isNotEmpty) {
       double rightOffset = 0.0;
       double leftOffset = 0.0;
 
-      for (final character in characters) {
-        double xPosition = 0.0;
-        double yPosition =
-            HelloworldHellolove.virtualResolution.y - character.size.y;
+      double centerOffset = 0.0;
+      double container = 1000;
+      double divider = 0.0;
+      for (final (_, char) in characters) {
+        if (char.positionAt == PositionAt.center) {
+          divider += 1;
+        }
+      }
 
-        if (character.positionAt == PositionAt.center) {
-          character.position = Vector2(
+      double offset = container / divider;
+      double rightAnchor = container + ((HelloworldHellolove.virtualResolution.x - (container)) / 2) - (offset / 2);
+      double leftAnchor = HelloworldHellolove.virtualResolution.x - rightAnchor;
+      centerOffset = offset * (divider - 1);
+
+      for (final (name, char) in characters) {
+        double xPosition = 0.0;
+        double yPosition = HelloworldHellolove.virtualResolution.y - char.size.y;
+        if (char.positionAt == PositionAt.center) {
+          char.position = Vector2(
             HelloworldHellolove.virtualResolution.x / 2 +
-                (character.facingAt == FacingAt.right
-                    ? (character.size.x / 2)
-                    : -(character.size.x / 2)),
+                (char.facingAt == FacingAt.right
+                    ? (rightAnchor - container) + (container / 2) - centerOffset
+                    : (leftAnchor - container) + (container / 4) - centerOffset),
             yPosition,
           );
+          centerOffset -= offset;
         } else {
-          if (character.facingAt == FacingAt.right) {
-            xPosition = 800 + leftOffset;
+          if (char.positionAt == PositionAt.left) {
+            char.facingAt == FacingAt.right ? xPosition = 800 + leftOffset : xPosition = -100 + leftOffset;
             leftOffset += 400;
-          } else {
-            xPosition = 1120 - rightOffset;
+          } else if (char.positionAt == PositionAt.right) {
+            char.facingAt == FacingAt.left ? xPosition = 1120 - rightOffset : xPosition = 2020 + rightOffset;
             rightOffset += 400;
           }
-          character.position = Vector2(xPosition, yPosition);
+          char.position = Vector2(xPosition, yPosition);
         }
-        character.priority = 1;
+        char.priority = 1;
 
-        await add(character);
-        _characterSprites[character.name] = character;
+        await add(char);
+        _characterSprites[name] = char;
       }
     }
   }
 
-  List<CharacterData> parseCharacters(String charStr) {
-    final List<CharacterData> characters = [];
+  List<(String, CharacterData)> _parseCharacters(String charStr) {
+    final List<(String, CharacterData)> characters = [];
     // This RegExp finds "left(...)", "right(...)", or "center(...)"
     final RegExp positionRegex = RegExp(r'(left|right|center)\(([^)]+)\)');
 
     for (final match in positionRegex.allMatches(charStr)) {
-      final String positionStr = match.group(
-        1,
-      )!; // "left", "right", or "center"
+      final String positionStr = match.group(1)!; // "left", "right", or "center"
       final String namesStr = match.group(2)!; // "Habane, Akagi"
-      // print(positionStr + ' -- ' + namesStr);
 
       final names = namesStr.split(',').map((e) => e.trim()).toList();
-      // print(names);
 
-      PositionAt pos;
-      FacingAt face;
+      late PositionAt pos;
+      late FacingAt face;
 
-      // Set position and facing direction based on the command
       switch (positionStr) {
         case 'left':
           pos = PositionAt.left;
@@ -94,12 +99,32 @@ extension SetSceneLogic on Scene {
       }
 
       for (final name in names) {
-        final String fullName = name;
-        final CharacterData char = characterFactory(fullName);
+        // "Akagi.happy" -> ['Akagi', 'happy']
+        final parts = name.split('.');
+        final charName = parts[0];
+        // --- REFACTORED LOGIC ---
+        // Set defaults
+        String state = 'default';
+        FacingAt finalFace = face; // Use the position-based default
+
+        if (parts.length == 2) {
+          // Could be "Akagi.happy" or "Akagi.r"
+          if (parts[1] == 'l' || parts[1] == 'r') {
+            finalFace = parts[1] == 'r' ? FacingAt.right : FacingAt.left;
+          } else {
+            state = parts[1];
+          }
+        } else if (parts.length == 3) {
+          // "Akagi.happy.r"
+          state = parts[1];
+          finalFace = parts[2] == 'r' ? FacingAt.right : FacingAt.left;
+        }
+
+        final CharacterData char = characterFactory(charName);
         char.positionAt = pos;
-        char.facingAt = face;
-        char.greydOut(true);
-        characters.add(char);
+        char.facingAt = finalFace;
+        char.state = state;
+        characters.add((charName, char));
       }
     }
     return characters;

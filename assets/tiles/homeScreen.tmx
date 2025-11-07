@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="1920" height="1080" tilewidth="1" tileheight="1" infinite="0" nextlayerid="13" nextobjectid="50">
- <tileset firstgid="1" source="newGameButton.tsx"/>
- <tileset firstgid="2" source="newGameButton.tsx"/>
- <objectgroup id="12" name="HomeScreenButtons">
-  <object id="46" name="NewGameButton" gid="3" x="1422" y="225" width="447" height="183"/>
-  <object id="47" name="LoadGameButton" gid="3" x="1429" y="456" width="447" height="183"/>
-  <object id="48" gid="3" x="1441" y="689" width="447" height="183"/>
-  <object id="49" gid="3" x="1450" y="931" width="447" height="183"/>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="1920" height="1080" tilewidth="1" tileheight="1" infinite="0" nextlayerid="13" nextobjectid="61">
+ <tileset firstgid="1" source="gameHUD.tsx"/>
+ <objectgroup id="12" name="homeScreenButtons">
+  <object id="60" name="main_menu_bg" gid="9" x="0" y="1080" width="1920" height="1080"/>
+  <object id="52" name="newGame" type="button" gid="11" x="1406" y="562" width="400" height="100"/>
+  <object id="53" name="loadGame" type="button" gid="6" x="1406" y="672" width="400" height="100"/>
+  <object id="54" name="gallery" type="button" gid="4" x="1406" y="782" width="400" height="100"/>
+  <object id="55" name="settings" type="button" gid="14" x="1406" y="892" width="400" height="100"/>
+  <object id="56" name="exit" type="button" gid="3" x="1406" y="1002" width="400" height="100"/>
+  <object id="57" name="logo" gid="7" x="1381" y="462" width="450" height="450"/>
  </objectgroup>
 </map>

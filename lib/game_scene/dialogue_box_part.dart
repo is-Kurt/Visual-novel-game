@@ -14,9 +14,7 @@ extension DialogueBoxPart on Scene {
       priority: 10,
     );
 
-    final textStyle = TextPaint(
-      style: TextStyle(fontSize: 32.0, color: const Color(0xFFFFFFFF)),
-    );
+    final textStyle = TextPaint(style: TextStyle(fontSize: 32.0, color: const Color(0xFFFFFFFF)));
 
     const padding = 50.0;
 

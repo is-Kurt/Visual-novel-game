@@ -1,25 +1,23 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flame/camera.dart';
 import 'package:flutter/services.dart';
-
+import 'package:helloworld_hellolove/game_assets/character_sprites_cache.dart';
 import 'package:helloworld_hellolove/screens/home_screen.dart';
 import 'package:helloworld_hellolove/game_scene/scene.dart';
-import 'package:flutter/painting.dart';
 import 'package:helloworld_hellolove/game_assets/scene_set.dart';
 
 class HelloworldHellolove extends FlameGame with HasKeyboardHandlerComponents {
   static final virtualResolution = Vector2(1920, 1080);
 
-  // --- NEW: Class-level variables ---
   late List<SceneSets> chapters;
   late SceneSets chapter;
   late Scene chapterScene;
   late World homeScreen;
   late final CameraComponent cam;
-  // ----------------------------------
 
   @override
   Color backgroundColor() {
@@ -28,13 +26,10 @@ class HelloworldHellolove extends FlameGame with HasKeyboardHandlerComponents {
 
   @override
   FutureOr<void> onLoad() async {
-    // String fullText = await rootBundle.loadString('assets/');
-    // print(fullText);
     await images.loadAllImages();
+    await CharacterSpriteManager.loadAllSprites();
 
-    homeScreen = HomeScreen(); // Assign to class variable
-
-    // Assign to class variable
+    homeScreen = HomeScreen();
     cam = CameraComponent(
       world: homeScreen,
       viewport: FixedResolutionViewport(resolution: virtualResolution),
@@ -45,6 +40,14 @@ class HelloworldHellolove extends FlameGame with HasKeyboardHandlerComponents {
     await add(cam);
 
     return super.onLoad();
+  }
+
+  void exitGame() {
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      exit(0);
+    } else {
+      SystemNavigator.pop();
+    }
   }
 
   void startNewGame() {

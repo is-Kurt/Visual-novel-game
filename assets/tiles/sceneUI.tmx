@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="1920" height="1080" tilewidth="1" tileheight="1" infinite="0" nextlayerid="4" nextobjectid="3">
- <tileset firstgid="1" source="exitButton.tsx"/>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="1920" height="1080" tilewidth="1" tileheight="1" infinite="0" nextlayerid="4" nextobjectid="12">
+ <tileset firstgid="1" source="gameHUD.tsx"/>
  <objectgroup id="2" name="sceneElements">
-  <object id="1" name="exitButton" gid="1" x="1762.88" y="73.5455" width="126.301" height="39.9791"/>
   <object id="2" name="decisionContainer" x="460" y="0" width="1000" height="780"/>
+  <object id="4" name="dialogueBox" x="210" y="780" width="1500" height="300"/>
+  <object id="6" name="auto" type="button" gid="1" x="440" y="1054" width="200" height="50"/>
+  <object id="7" name="logs" type="button" gid="8" x="650" y="1054" width="200" height="50"/>
+  <object id="8" name="save" type="button" gid="12" x="1070" y="1054" width="200" height="50"/>
+  <object id="10" name="menu" type="button" gid="13" x="1280" y="1054" width="200" height="50"/>
+  <object id="11" name="load" type="button" gid="5" x="860" y="1054" width="200" height="50"/>
  </objectgroup>
 </map>

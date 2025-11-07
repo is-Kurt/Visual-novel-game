@@ -1,52 +1,111 @@
-// Point 1: The First Meeting
-// 'POINT' is a label we can jump to.
-SCENE{POINT:1, LOCATION: Courtyard (Sunset), CHARACTERS: [left(Habane, Akagi), right(Hotaru)]}
+// --- POINT 1: The Classroom ---
+SCENE{POINT:1, LOCATION: Classroom1 (Day), CHARACTERS: [right(Hotaru.l)]}
+CLEAR
+{SAY:Hotaru, STATE:smile}: "Hey! I was just thinking about you. Today feels like it's going to be a good day, don't you think?"
+{SAY:Hotaru, STATE:koi}: "I was thinking of going to the rooftop for lunch. You should join me!"
 
-{SAY:Akagi Kohaku, STATE:blushing}:"Oh... hello. I'm Akagi Kohaku. It's nice to meet you."
-{SAY:Hotaru Yuna, STATE:default}:"Hi there! I'm Hotaru Yuna! Are you new here?"
-{SAY:Habane Akari, STATE:disappointed}:"What are you looking at? Stop staring, it's weird."
-{SAY:Hotaru Yuna, STATE:koi}:"You're both so cute! I could just watch you all day."
+DECISION{1_A: "Sounds great!", 1_B: "I'm not sure..."}
 
-// A decision block. The key is the text, the value is the POINT to jump to.
-DECISION{1_A:Introduce myself, 1_B:Stay quiet:, 1_C:Ask Habane a question}
+// Branch 1A
+SCENE{POINT:1_A}
+{SAY:Hotaru, STATE:blushing}: "Perfect! It's a date! ...I mean, a lunch date! As friends! ...You know what I mean!"
+JUMP{2}
 
-// Branch A
-SCENE{POINT:1_A, LOCATION: Courtyard (Sunset), CHARACTERS: [left(Habane, Akagi), right(Hotaru)]}
-{SAY:Akagi Kohaku, STATE:smile}:"It's nice to meet you too! I hope we can be friends."
-{SAY:Hotaru Yuna, STATE:blushing}:"Of course! We'd love that!"
-JUMP{2} // Jump to the next major point
+// Branch 1B
+SCENE{POINT:1_B}
+{SAY:Hotaru, STATE:disappointed}: "Oh... well, think about it, okay? I'll save you a spot, just in case."
+JUMP{2}
 
-// Branch B
-SCENE{POINT:1_B, LOCATION: Courtyard (Sunset), CHARACTERS: [left(Habane, Akagi), right(Hotaru)]}
-{SAY:Habane Akari, STATE:smug}:"Hmph. Not much of a talker, are you?"
-{SAY:Hotaru Yuna, STATE:concerned}:"Habane-chan, be nice! Maybe they're just shy."
-JUMP{2} // Jump to the next major point
+// --- POINT 2: Rooftop Lunch ---
+SCENE{POINT:2, LOCATION: School Rooftop (Day), CHARACTERS: [left(Habane.r), right(Hotaru.l)]}
+CLEAR
+{SAY:Hotaru, STATE:smile}: "See? Isn't this great? The view is amazing!"
+{SAY:Habane, STATE:smug}: "Hmph. It's just a view. And it's crowded. Why did you bring them here?"
+{SAY:Hotaru, STATE:koi}: "Habane-chan, be nice! They're our new friend."
 
-// Branch C
-SCENE{POINT:1_C, LOCATION: Courtyard (Sunset), CHARACTERS: [left(Habane, Akagi), right(Hotaru)]}
-{SAY:Habane Akari, STATE:shocked}:"W-what? Why are you asking me?"
-{SAY:Habane Akari, STATE:tsundere}:"It's not like I care what you think! ...But I guess you can ask."
-JUMP{2} // Jump to the next major point
-
-// Point 2: Hallway
-SCENE{POINT:2, LOCATION: Corridor2 (Night), CHARACTERS: [center(Habane)]}
-{SAY:Habane Akari, STATE:concerned}:"What a long day... I'm glad it's over."
-{SAY:Habane Akari, STATE:default}:"You're still here? What do you want?"
-
-// Your requested format: {1:Yes, 2:No, ...}
-// I've mapped them to jump points.
-DECISION{2_A:Agree with her, 2_B:Disagree with her}
+DECISION{2_A: "Nice to see you, Habane.", 2_B: "Mind if I sit here?"}
 
 // Branch 2A
-SCENE{POINT:2_A, LOCATION: Corridor2 (Night), CHARACTERS: [center(Habane)]}
-{SAY:Habane Akari, STATE:default}:"Yeah, it was exhausting. Well, whatever. I'm going home."
-JUMP{END} // Jump to the end of the script
+SCENE{POINT:2_A}
+{SAY:Habane, STATE:tsundere}: "W-whatever. It's not like I care if you're here or not. Just... don't be loud."
+JUMP{3}
 
 // Branch 2B
-SCENE{POINT:2_B, LOCATION: Corridor2 (Night), CHARACTERS: [center(Habane)]}
-{SAY:Habane Akari, STATE:mad1}:"What? You liked today? You're weird."
-{SAY:Habane Akari, STATE:smug}:"Hmph. See you tomorrow... I guess."
-JUMP{END} // Jump to the end of the script
+SCENE{POINT:2_B}
+{SAY:Habane, STATE:mad1}: "What? I don't own the rooftop. Sit wherever you want, I guess. ...Just not too close."
+JUMP{3}
 
-// The end of the script
-SCENE{POINT:END, LOCATION: Corridor2 (Night), CHARACTERS: []}
+// --- POINT 3: Library After School ---
+SCENE{POINT:3, LOCATION: Library, CHARACTERS: [center(Akagi.r)]}
+CLEAR
+{SAY:Akagi, STATE:default}: "..."
+{SAY:Akagi, STATE:default}: "(She seems to be completely focused on her book.)"
+{SAY:Akagi, STATE:shocked}: "Oh! Hello. I didn't see you there. I was just... lost in this chapter."
+
+DECISION{3_A: "What are you reading?", 3_B: "Sorry, I'll let you read."}
+
+// Branch 3A
+SCENE{POINT:3_A}
+{SAY:Akagi, STATE:smile}: "It's a history of European architecture. It's fascinating. Would you like to see?"
+{SAY:Akagi, STATE:default}: "We could... study together? If you'd like."
+JUMP{4}
+
+// Branch 3B
+SCENE{POINT:3_B}
+{SAY:Akagi, STATE:smile}: "Oh, no, it's fine! I could use a break. Please, sit. It's nice to have the company."
+{SAY:Akagi, STATE:default}: "It's quiet, but... a little *too* quiet, sometimes."
+JUMP{4}
+
+// --- POINT 4: The Walk Home ---
+SCENE{POINT:4, LOCATION: Corridor2 (Night), CHARACTERS: [left(Hotaru.l), right(Akagi.r)]}
+CLEAR
+{SAY:Hotaru, STATE:smile}: "Wow, I'm glad we all finished up at the same time! This is great!"
+{SAY:Akagi, STATE:smile}: "Yes, it's a pleasant coincidence."
+{SAY:Hotaru, STATE:koi}: "Hey, instead of heading straight home, what do you say we... "
+
+DECISION{4_A: "Go to the Cafe?", 4_B: "Take a walk in the Park?"}
+
+// Branch 4A: Cafe
+SCENE{POINT:4_A, LOCATION: Modern Cafe, CHARACTERS: [left(Hotaru.smile.r), right(Akagi.smile.l)]}
+CLEAR
+{SAY:Hotaru, STATE:blushing}: "This place has the best parfaits! My treat!"
+{SAY:Akagi, STATE:smile}: "This is a lovely cafe. The atmosphere is very calming."
+JUMP{5}
+
+// Branch 4B: Park
+SCENE{POINT:4_B, LOCATION: Park (Day), CHARACTERS: [left(Akagi.smile.r), right(Hotaru.smile.l)]}
+CLEAR
+{SAY:Akagi, STATE:smile}: "The air is so fresh here. It's a nice change from the library."
+{SAY:Hotaru, STATE:smile}: "Look! The swings are free! C'mon, Akagi-chan, race you!"
+{SAY:Akagi, STATE:shocked}: "H-hey! Wait!"
+JUMP{5}
+
+// --- POINT 5: The Bus Stop ---
+SCENE{POINT:5, LOCATION: Bus Station (Night), CHARACTERS: [center(Habane.tsundere.l)]}
+CLEAR
+{SAY:Habane, STATE:tsundere}: "Oh. It's you. ...Are you following me?"
+{SAY:Habane, STATE:default}: "I saw you with Akagi and Hotaru earlier. You're... popular, all of a sudden."
+{SAY:Habane, STATE:concerned}: "It's not... annoying, is it? Being with them all the time?"
+
+DECISION{5_A: "It's fun.", 5_B: "It's a little tiring.", 5_C: "What about you, Habane?"}
+
+// Branch 5A
+SCENE{POINT:5_A}
+{SAY:Habane, STATE:smug}: "Hmph. You're as energetic as they are, then. Well... I guess that's fine."
+JUMP{END}
+
+// Branch 5B
+SCENE{POINT:5_B}
+{SAY:Habane, STATE:shocked}: "R-really? ...I mean, I get it. They're a handful."
+{SAY:Habane, STATE:tsundere}: "Well... my bus is here. Don't... get too worn out. ...Idiot."
+JUMP{END}
+
+// Branch 5C
+SCENE{POINT:5_C}
+{SAY:Habane, STATE:shocked}: "Me?! Why are you asking me? I... I just... "
+{SAY:Habane, STATE:tsundere}: "It's none of your business! My bus is here! See you tomorrow!"
+JUMP{END}
+
+// --- END OF SCRIPT ---
+SCENE{POINT:END}
+CLEAR

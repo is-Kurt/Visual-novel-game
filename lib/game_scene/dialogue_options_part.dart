@@ -9,26 +9,23 @@ extension DialogueOptionsPart on Scene {
     }
     _decisionButtons.clear();
 
-    if (_scenePointLineIndex.isNotEmpty &&
-        _scenePointLineIndex[sceneName] != null) {
+    if (_scenePointLineIndex.isNotEmpty && _scenePointLineIndex[sceneName] != null) {
       _currentLineIndex = _scenePointLineIndex[sceneName]!;
     }
 
     if (kDebugMode) {
-      print("Decision made: Go to scene '$sceneName'");
+      sceneName.toUpperCase() == 'CONT' ? print('continue') : print("Decision made: Go to scene '$sceneName'");
     }
 
     _advanceScript();
   }
 
-  Future<void> _showDecisions(List<String> options, List<String> scenes) async {
+  Future<void> _showDecisions(List<String> options, List<String> scenesPoints) async {
     _isWaitingForDecision = true;
 
-    if (sceneElements == null) return;
+    if (objectLayer == null) return;
 
-    final TiledObject container = sceneElements!.objects.firstWhere(
-      (object) => object.name == 'decisionContainer',
-    );
+    final TiledObject container = objectLayer!.objects.firstWhere((object) => object.name == 'decisionContainer');
 
     const double boxHeight = 70;
     const double bottomMargin = 10;
@@ -36,15 +33,14 @@ extension DialogueOptionsPart on Scene {
 
     for (int i = 0; i < options.length; i++) {
       final double offsetY = i * (boxHeight + bottomMargin);
-
       final decisionButton = await _createDecisionButton(
         container,
         boxHeight,
         offsetY,
         overallHeight,
         options[i],
-        scenes[i],
-        () => _handleDecision(scenes[i]),
+        scenesPoints[i],
+        () => _handleDecision(scenesPoints[i]),
       );
 
       await add(decisionButton);
@@ -74,17 +70,12 @@ extension DialogueOptionsPart on Scene {
       anchor: Anchor.topLeft,
       priority: 10,
       button: buttonShape,
-      buttonDown: RectangleComponent(
-        size: boxSize,
-        paint: Paint()..color = const Color(0xAA333333),
-      ),
+      buttonDown: RectangleComponent(size: boxSize, paint: Paint()..color = const Color(0xAA333333)),
       onPressed: onPressed,
     );
 
     // Text style for button labels
-    final textStyle = TextPaint(
-      style: const TextStyle(fontSize: 24.0, color: Color(0xFFFFFFFF)),
-    );
+    final textStyle = TextPaint(style: const TextStyle(fontSize: 24.0, color: Color(0xFFFFFFFF)));
 
     const padding = 10.0;
 
