@@ -2,9 +2,12 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/input.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'package:flame_tiled/flame_tiled.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:helloworld_hellolove/game_db/game_save.dart';
+import 'package:helloworld_hellolove/game_db/save_manager.dart';
 import 'package:helloworld_hellolove/helloworld_hellolove.dart';
 import 'package:helloworld_hellolove/game_assets/character_data.dart';
 import 'package:flame/text.dart';
@@ -13,12 +16,14 @@ import 'package:helloworld_hellolove/mixin/ui_tiledmap_mixin.dart';
 
 part 'skip_or_advance_part.dart';
 part 'set_scene_part.dart';
-part 'dialogue_options_part.dart';
-part 'dialogue_box_part.dart';
+part 'dialogue_options_container_part.dart';
+part 'dialogue_container_part.dart';
 part 'parse_commands_part.dart';
+part 'line_scripts_part.dart';
 
 class Scene extends World with HasGameReference<HelloworldHellolove>, TapCallbacks, KeyboardHandler, TiledUiBuilder {
-  final String dialoguePath;
+  final String chapter;
+  final String playerName;
   final Map<String, CharacterData> _characterSprites = {};
   SpriteComponent? _backgroundComponent;
 
@@ -27,27 +32,44 @@ class Scene extends World with HasGameReference<HelloworldHellolove>, TapCallbac
   late final RectangleComponent _dialogueBox;
   late final TextBoxComponent _textBox;
 
-  static const double _textSpeed = 0.03;
+  static late double textSpeed;
   // --- Scripting Properties ---
   late final List<String> _scriptLines = [];
   final Map<String, int> _scenePointLineIndex = {};
-  int _currentLineIndex = 0;
+  int currentLineIndex = 0; // Accesed by game save
   bool _isTyping = false;
   bool _isWaitingForDecision = false;
   String _fullText = '';
   double _timer = 0.0;
   int _charIndex = 0;
 
-  Scene(this.dialoguePath);
+  // --- Button Properties ---
+  late ButtonComponent autoButton;
+  static bool isAuto = false;
+  double _autoAdvanceDelay = 0.0;
+  static late double advanceDelayTime;
+
+  // late ButtonComponent menuButton;
+  // late RoundedBoxComponent popUpBox;
+  bool isPopUpMounted = false;
+
+  // --- Save Game Properties ---
+  late String currentLocation;
+  late Map<String, CharacterData> currentCharacters;
+  late int currentPoint;
+  String currentText = '';
+  int? savedLine;
+  int? savedPoint;
+
+  Scene(this.chapter, this.playerName, {this.savedLine, this.savedPoint});
 
   @override
   FutureOr<void> onLoad() async {
-    final fullScriptText = await rootBundle.loadString(dialoguePath);
+    // if (savedPoint != null) print(chapter + ' --- ' + savedLine.toString() + ' --- ' + (savedPoint! - 1).toString());
+    currentCharacters = _characterSprites; // SAVE game property
 
     final tiledMap = await TiledComponent.load('sceneUI.tmx', Vector2.all(1.0));
-
     tiledMap.priority = 11;
-
     await add(tiledMap);
 
     objectLayer = tiledMap.tileMap.getLayer<ObjectGroup>('sceneElements');
@@ -55,67 +77,10 @@ class Scene extends World with HasGameReference<HelloworldHellolove>, TapCallbac
       buildUiFromTiled(objectLayer!);
     }
 
-    final rawLines = fullScriptText.split('\n');
-    String multiLineBuffer = '';
-    final RegExp scenePointRegex = RegExp(r'^SCENE\{\s*POINT:\s*([^\s,}]+)\s*,?\s*');
-    final RegExp pointRemover = RegExp(r'POINT:\s*[^\s,}]+\s*,?\s*');
-    int currentScriptIndex = 0;
-
-    for (final line in rawLines) {
-      String trimmedLine = line.trim();
-
-      if (multiLineBuffer.isNotEmpty) {
-        multiLineBuffer += ' $trimmedLine';
-        if (trimmedLine.endsWith('"') || trimmedLine.endsWith('}')) {
-          currentScriptIndex++;
-          _scriptLines.add(multiLineBuffer);
-          multiLineBuffer = '';
-        }
-      } else if (trimmedLine.startsWith('{') && trimmedLine.contains('}:')) {
-        if (trimmedLine.endsWith('"')) {
-          currentScriptIndex++;
-          print(trimmedLine);
-          _scriptLines.add(trimmedLine);
-        } else {
-          multiLineBuffer = trimmedLine;
-        }
-      } else if (trimmedLine.startsWith('SCENE{')) {
-        final sceneMatch = scenePointRegex.firstMatch(trimmedLine);
-        if (sceneMatch != null) {
-          final scenePoint = sceneMatch.group(1)!;
-          _scenePointLineIndex[scenePoint] = currentScriptIndex;
-          trimmedLine = line.replaceFirst(pointRemover, '');
-          // print(trimmedLine);
-          // print(_scenePointLineIndex);
-        }
-        currentScriptIndex++;
-        _scriptLines.add(trimmedLine);
-      } else if (trimmedLine.startsWith('DECISION{')) {
-        if (trimmedLine.endsWith('}')) {
-          currentScriptIndex++;
-          _scriptLines.add(trimmedLine);
-        } else {
-          multiLineBuffer = trimmedLine;
-        }
-      } else if (trimmedLine.startsWith('JUMP{')) {
-        currentScriptIndex++;
-        _scriptLines.add(trimmedLine);
-      } else if (trimmedLine.startsWith('CLEAR')) {
-        currentScriptIndex++;
-        _scriptLines.add(trimmedLine);
-      }
-    }
-    // print(_scenePointLineIndex);
-    // print('script lines' + _scriptLines.length.toString());
-    // for (var line in _scriptLines) {
-    //   print(line);
-    // }
-    // print('script ends');
+    await addScriptLines();
     await addDialogueBox();
-
-    // Start the script. The script will load the first background/characters
-    await _advanceScript();
-
+    await advanceScript();
+    await saveGame(); // new game save
     return super.onLoad();
   }
 
@@ -123,46 +88,31 @@ class Scene extends World with HasGameReference<HelloworldHellolove>, TapCallbac
   void update(double dt) {
     super.update(dt);
 
-    if (_isTyping) {
+    if ((_isTyping || isAuto) && !isPopUpMounted) {
       if (_charIndex < _fullText.length) {
         _timer += dt;
-        if (_timer >= _textSpeed) {
+        if (_timer >= textSpeed) {
           _timer = 0.0;
           _charIndex++;
           _textBox.text = _fullText.substring(0, _charIndex);
         }
       } else if (_charIndex >= _fullText.length) {
         _isTyping = false;
+        if (isAuto && !_isWaitingForDecision) {
+          _autoAdvanceDelay += dt;
+          if (_autoAdvanceDelay >= advanceDelayTime) {
+            _autoAdvanceDelay = 0;
+            advanceScript();
+          }
+        }
       }
     }
-  }
-
-  Future<void> _parseLine(String line) async {
-    // --- Check for SCENE command ---
-    if (await scene(line)) return;
-
-    // --- Check for DECISION command ---
-    if (decision(line)) return;
-
-    // --- Check for DIALOGUE command ---
-    if (dialogue(line)) return;
-
-    // --- CHECK for JUMP COMMAND ---
-    if (jump(line)) return;
-
-    // --- CHECK for CLEAR COMMAND ---
-    if (clear(line)) return;
-    // --- Handle other commands or errors ---
-    if (kDebugMode) {
-      print('WARNING: Unknown script line: $line');
-    }
-
-    await _advanceScript();
   }
 
   @override
   bool onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.space) {
+      isAutoClicked(false);
       _skipOrAdvance();
     }
     return super.onKeyEvent(event, keysPressed);
@@ -170,7 +120,41 @@ class Scene extends World with HasGameReference<HelloworldHellolove>, TapCallbac
 
   @override
   void onTapDown(TapDownEvent event) {
+    isAutoClicked(false);
     _skipOrAdvance();
     super.onTapDown(event);
+  }
+
+  void isAutoClicked(bool isClickedFromButton) {
+    final visual = autoButton.button;
+
+    if (visual is SpriteComponent) {
+      if (isClickedFromButton) {
+        isAuto = !isAuto;
+        if (isAuto) {
+          visual.paint.colorFilter = const ColorFilter.mode(Color(0x80000000), BlendMode.srcATop);
+        } else {
+          visual.paint.colorFilter = null;
+        }
+      } else {
+        isAuto = false;
+        visual.paint.colorFilter = null;
+      }
+    }
+  }
+
+  Future<void> saveGame() async {
+    final saveManager = SaveManager();
+    GameSave save = GameSave(
+      saveName: playerName,
+      playerName: playerName,
+      gameChapter: chapter,
+      gameSavedLine: currentLineIndex,
+      currentLocation: currentLocation,
+      currentCharacters: currentCharacters,
+      currentText: currentText,
+      currentPoint: currentPoint,
+    );
+    await saveManager.saveGame(save);
   }
 }

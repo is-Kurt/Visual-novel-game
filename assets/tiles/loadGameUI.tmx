@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="1920" height="1080" tilewidth="1" tileheight="1" infinite="0" nextlayerid="3" nextobjectid="14">
+ <tileset firstgid="1" source="gameHUD.tsx"/>
+ <objectgroup id="2" name="loadGameUI">
+  <object id="11" name="background" gid="17" x="0" y="1080" width="1920" height="1080" visible="0"/>
+  <object id="12" name="skip" type="button" gid="15" x="810" y="1025" width="300" height="75"/>
+  <object id="10" name="menu" type="button" gid="13" x="1500" y="1025" width="300" height="75"/>
+  <object id="13" name="logs" type="button" gid="8" x="500" y="1025" width="300" height="75"/>
+ </objectgroup>
+</map>

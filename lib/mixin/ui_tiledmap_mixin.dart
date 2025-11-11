@@ -1,10 +1,24 @@
 import 'package:flame/components.dart';
 import 'package:flame/input.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'package:flame_tiled/flame_tiled.dart';
+import 'package:flutter/material.dart';
+import 'package:helloworld_hellolove/game_db/save_manager.dart';
+import 'package:helloworld_hellolove/game_scene/scene.dart';
 import 'package:helloworld_hellolove/helloworld_hellolove.dart';
 import 'package:flutter/foundation.dart';
+import 'package:helloworld_hellolove/screens/home_screen.dart';
+import 'package:helloworld_hellolove/screens/load_game_screen/load_game_screen.dart';
+import 'package:helloworld_hellolove/screens/settings_overlay.dart';
+import 'package:helloworld_hellolove/utils/rounded_rectangle.dart';
+import 'package:helloworld_hellolove/utils/tappable_input_text_box.dart';
 
-final List<String> objectExceptions = ['dialogueBox', 'decisionContainer'];
+part 'pop_up_card_part.dart';
+part 'scene_buttons_part.dart';
+part 'home_screen_buttons_part.dart';
+part 'load_game_screen_buttons_part.dart';
+
+final List<String> objectExceptions = ['decisionContainer'];
 
 mixin TiledUiBuilder on Component, HasGameReference<HelloworldHellolove> {
   Future<void> buildUiFromTiled(ObjectGroup objectLayer) async {
@@ -13,19 +27,46 @@ mixin TiledUiBuilder on Component, HasGameReference<HelloworldHellolove> {
         final sprite = await Sprite.load('HUD/${obj.name}.webp');
 
         if (obj.class_ == 'button') {
-          final button = ButtonComponent(
-            button: SpriteComponent(sprite: sprite, size: Vector2(obj.width, obj.height)),
+          late ButtonComponent button;
+
+          button = ButtonComponent(
+            button: SpriteComponent(
+              sprite: sprite,
+              size: Vector2(obj.width, obj.height),
+              paint: Paint()..filterQuality = FilterQuality.high,
+            ),
             position: Vector2(obj.x, obj.y),
             size: Vector2(obj.width, obj.height),
             anchor: Anchor.bottomLeft,
-            priority: 20,
+            priority: 10,
             onPressed: () {
               _handleButtonPress(obj.name);
             },
           );
           await add(button);
+
+          if (this is Scene) {
+            final scene = this as Scene;
+            if (obj.name == 'auto') scene.autoButton = button;
+            // if (obj.name == 'menu') scene.menuButton = button;
+          }
         } else {
-          final staticImage = SpriteComponent(sprite: sprite, position: Vector2(obj.x, obj.y), size: Vector2(obj.width, obj.height), anchor: Anchor.bottomLeft);
+          final staticImage = SpriteComponent(
+            sprite: sprite,
+            position: Vector2(obj.x, obj.y),
+            size: Vector2(obj.width, obj.height),
+            anchor: Anchor.bottomLeft,
+            paint: Paint()..filterQuality = FilterQuality.high,
+          );
+
+          if (this is LoadGameScreen) {
+            final overlay = RectangleComponent(
+              size: HelloworldHellolove.virtualResolution,
+              paint: Paint()..color = const Color(0x80000000),
+              priority: 0,
+            );
+            await staticImage.add(overlay);
+          }
           await add(staticImage);
         }
       }
@@ -33,28 +74,8 @@ mixin TiledUiBuilder on Component, HasGameReference<HelloworldHellolove> {
   }
 
   void _handleButtonPress(String buttonName) {
-    switch (buttonName) {
-      case 'newGame':
-        game.startNewGame();
-        break;
-      case 'loadGame':
-        print('Loading a saved game!');
-        // e.g., game.loadGame();
-        break;
-      case 'settingsButton':
-        print('Opening settings!');
-        // e.g., game.goToSettings();
-        break;
-      case 'menu':
-        game.goToHomeScreen();
-      case 'exit':
-        print('exit');
-        game.exitGame();
-        break;
-      default:
-        if (kDebugMode) {
-          print('Button "$buttonName" pressed (no action assigned).');
-        }
-    }
+    _homeScreenButons(buttonName);
+    _sceneButtons(buttonName);
+    _loadGameScreen(buttonName);
   }
 }
