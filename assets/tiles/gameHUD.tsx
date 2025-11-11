@@ -4,9 +4,6 @@
  <tile id="0">
   <image source="../images/HUD/auto.webp" width="431" height="108"/>
  </tile>
- <tile id="1">
-  <image source="../images/HUD/bg.webp" width="1366" height="768"/>
- </tile>
  <tile id="2">
   <image source="../images/HUD/exit.webp" width="434" height="102"/>
  </tile>
@@ -42,5 +39,8 @@
  </tile>
  <tile id="14">
   <image source="../images/HUD/skip.webp" width="439" height="115"/>
+ </tile>
+ <tile id="16">
+  <image source="../images/HUD/background.webp" width="1184" height="864"/>
  </tile>
 </tileset>

@@ -1,7 +1,38 @@
 part of 'scene.dart';
 
 extension ParseCommandsPart on Scene {
-  Future<bool> scene(String line) async {
+  Future<void> parseLine(String line) async {
+    // --- Check for SCENE command ---
+    if (await _scene(line)) return;
+
+    // --- Check for DECISION command ---
+    if (await _decision(line)) return;
+
+    // --- Check for DIALOGUE command ---
+    if (_dialogue(line)) return;
+
+    // --- CHECK for JUMP COMMAND ---
+    if (_jump(line)) return;
+
+    // --- CHECK for CLEAR COMMAND ---
+    if (_clear(line)) return;
+
+    // --- CHECK gor CHAPTER COMMAND ---
+    if (_chapter(line)) return;
+
+    // --- Handle other commands or errors ---
+    if (kDebugMode) {
+      print('WARNING: Unknown script line: $line');
+    }
+    await advanceScript();
+  }
+
+  Future<bool> _scene(String line) async {
+    if (line == 'SCENE{}') {
+      await advanceScript();
+      return true;
+    }
+
     final RegExp sceneRegex = RegExp(r'SCENE\{\s*LOCATION:\s*([^,]+),\s*CHARACTERS:\s*\[(.*)\]\s*\}$');
     final sceneMatch = sceneRegex.firstMatch(line.trim());
 
@@ -9,21 +40,36 @@ extension ParseCommandsPart on Scene {
       final String locationName = sceneMatch.group(1)!.trim();
       final String charactersString = sceneMatch.group(2)!.trim();
 
+      currentLocation = locationName; // SAVE game property
+      currentPoint = currentLineIndex; // Save game property
+
       final List<(String, CharacterData)> characters = _parseCharacters(charactersString);
 
       await _setScene(locationName, characters);
 
-      await _advanceScript();
+      await advanceScript();
       return true;
     }
     return false;
   }
 
-  bool decision(String line) {
+  Future<bool> _decision(String line) async {
     final RegExp decisionRegex = RegExp(r'^DECISION\{(.*)\}$');
     final decisionMatch = decisionRegex.firstMatch(line.trim());
 
     if (decisionMatch != null) {
+      if (game.playSounds) {
+        game.fadeAudio(FlameAudio.bgm.audioPlayer, 0.0, 0.5, () {
+          FlameAudio.bgm.pause();
+        });
+
+        game.minigameAudioPlayer = await FlameAudio.loop('Minigame OST.wav', volume: 0.0);
+
+        if (game.minigameAudioPlayer != null) {
+          game.fadeAudio(game.minigameAudioPlayer!, game.soundVolume, 0.5);
+        }
+      }
+
       final String optionsStr = decisionMatch.group(1)!; // "a:Yes, b:No, ..."
       final List<String> options = [];
       final List<String> scenesPoints = [];
@@ -37,13 +83,13 @@ extension ParseCommandsPart on Scene {
         }
       }
 
-      _showDecisions(options, scenesPoints);
+      showDecisions(options, scenesPoints);
       return true;
     }
     return false;
   }
 
-  bool dialogue(String line) {
+  bool _dialogue(String line) {
     final RegExp dialogueRegex = RegExp(r'^\{(.*)\}:\s*\"([\s\S]*)\"$');
     final dialogueMatch = dialogueRegex.firstMatch(line.trim());
 
@@ -57,7 +103,6 @@ extension ParseCommandsPart on Scene {
 
       for (final cmdStr in commandList) {
         final parts = cmdStr.split(':');
-        print(parts);
         if (parts.length == 2) {
           final command = parts[0].trim().toUpperCase();
           final value = parts[1].trim();
@@ -84,18 +129,25 @@ extension ParseCommandsPart on Scene {
     return false;
   }
 
-  bool jump(String line) {
-    final RegExp jumpRegex = RegExp(r'JUMP\{\s*([^\s\}]+)\s*\}');
+  bool _jump(String line) {
+    final RegExp jumpRegex = RegExp(r'JUMP\(\s*([^\s\)]+)\s*\);');
+
     final jumpMatch = jumpRegex.firstMatch(line.trim());
+
     if (jumpMatch != null) {
       final String scene = jumpMatch.group(1)!.trim();
-      scene.toUpperCase() == 'END' ? _currentLineIndex = _scenePointLineIndex[scene]! : _currentLineIndex = _scenePointLineIndex[scene]!;
+      if (_scenePointLineIndex[scene] != null) {
+        currentLineIndex = _scenePointLineIndex[scene]!;
+      }
+
       return true;
     }
     return false;
   }
 
-  bool clear(String line) {
+  bool _clear(String line) {
+    currentText = ''; // SAVE game property
+
     if (line.toUpperCase() == 'CLEAR') {
       clearScene();
       return true;
@@ -103,11 +155,19 @@ extension ParseCommandsPart on Scene {
     return false;
   }
 
-  void handleState(String charName, String stateName) {
-    // if (kDebugMode) {
-    //   print('SCRIPT: Character $charName changes to $stateName');
-    // }
+  bool _chapter(String line) {
+    final RegExp chapterRegex = RegExp(r'CHAPTER\{\s*([^\s\}]+)\s*\}');
+    final chapterMatch = chapterRegex.firstMatch(line.trim());
 
+    if (chapterMatch != null) {
+      final String path = chapterMatch.group(1)!;
+      game.goToChapter(path, playerName);
+      return true;
+    }
+    return true;
+  }
+
+  void handleState(String charName, String stateName) {
     final charComponent = _characterSprites[charName];
     if (charComponent != null) {
       charComponent.setState(stateName);

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flame/components.dart';
+import 'package:flutter/material.dart';
 import 'package:helloworld_hellolove/game_assets/character_sprites_cache.dart';
 
 enum PositionAt { center, left, right }
@@ -11,10 +12,17 @@ class CharacterData extends SpriteComponent {
   late final List<String> states;
   late final String name;
   late PositionAt positionAt;
-  String state = 'default';
+  String state;
   FacingAt facingAt;
 
-  CharacterData({required this.states, required this.name, required super.size, this.facingAt = FacingAt.right});
+  CharacterData({
+    required this.states,
+    required this.name,
+    required super.size,
+    this.facingAt = FacingAt.right,
+    this.positionAt = PositionAt.center,
+    this.state = 'default',
+  });
 
   @override
   FutureOr<void> onLoad() {
@@ -24,8 +32,8 @@ class CharacterData extends SpriteComponent {
   }
 
   void setState(String state) {
-    state = state.toLowerCase();
-    sprite = CharacterSpriteManager.getSprite(name, state);
+    this.state = state.toLowerCase();
+    sprite = CharacterSpriteManager.getSprite(name, this.state);
   }
 
   void setPosition(Vector2 position) {
@@ -45,6 +53,54 @@ class CharacterData extends SpriteComponent {
       paint.colorFilter = null;
       priority = 2;
     }
+  }
+
+  // --- 2. FIXED fromJson ---
+  factory CharacterData.fromJson(Map<String, dynamic> json) {
+    // Load Vector2
+    final sizeMap = json['size'] as Map<String, dynamic>;
+    final size = Vector2(sizeMap['x'], sizeMap['y']);
+
+    // Load PositionAt enum
+    final positionString = json['positionAt'] as String;
+    final position = PositionAt.values.byName(positionString);
+
+    // Load FacingAt enum
+    final facingString = json['facingAt'] as String;
+    final facing = FacingAt.values.byName(facingString);
+
+    return CharacterData(
+      states: List<String>.from(json['states']),
+      name: json['name'] as String,
+      size: size,
+      positionAt: position, // Pass loaded value
+      facingAt: facing, // Pass loaded value
+      state: json['state'] as String, // Pass loaded value
+    );
+  }
+
+  // --- 3. FIXED toJson ---
+  Map<String, dynamic> toJson() {
+    return {
+      'states': states,
+      'name': name,
+
+      // Save enums using their string name
+      'positionAt': positionAt.name,
+      'facingAt': facingAt.name,
+
+      // Save the current state
+      'state': state,
+
+      // Convert Vector2 into a simple map
+      'size': {'x': size.x, 'y': size.y},
+    };
+  }
+
+  @override
+  String toString() {
+    // Customize this to show whatever you want!
+    return 'Character(Name: $name, State: $state, Pos: $positionAt, Facing: $facingAt, Size: $size)';
   }
 }
 

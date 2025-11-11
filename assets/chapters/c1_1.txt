@@ -1,0 +1,50 @@
+// --- POINT 1: The Classroom ---
+SCENE{POINT:1, LOCATION: Classroom1 (Day), CHARACTERS: [right(Hotaru.l)]}
+
+CLEAR
+{SAY:PLAYER}: "My name is PLAYER and PLAYER is my name"
+{SAY:PLAYER}: "My name is PLAYER and PLAYER is my name"
+{SAY:Hotaru}: "Hey! I was just thinking about you. Today feels like it's going to be a good day, don't you think?"
+CLEAR
+{SAY:Hotaru, STATE:koi}: "I was thinking of going to the rooftop for lunch. You should join me!"
+
+DECISION{1_A: "Sounds great!", 1_B: "I'm not sure..."}
+
+// Branch 1A
+SCENE{POINT:1_A}
+{SAY:Hotaru, STATE:blushing}: "Perfect! It's a date! ...I mean, a lunch date! As friends! ...You know what I mean!"
+JUMP{2}
+
+// Branch 1B
+SCENE{POINT:1_B}
+{SAY:Hotaru, STATE:disappointed}: "Oh... well, think about it, okay? I'll save you a spot, just in case."
+JUMP{2}
+
+// --- POINT 2: Rooftop Lunch ---
+SCENE{POINT:2, LOCATION: School Rooftop (Day), CHARACTERS: [left(Habane.r), right(Hotaru.l)]}
+CLEAR
+{SAY:Hotaru, STATE:smile}: "See? Isn't this great? The view is amazing!"
+{SAY:Habane, STATE:smug}: "Hmph. It's just a view. And it's crowded. Why did you bring them here?"
+{SAY:Hotaru, STATE:koi}: "Habane-chan, be nice! They're our new friend."
+
+DECISION{2_A: "Nice to see you, Habane.", 2_B: "Mind if I sit here?"}
+
+// Branch 2A
+SCENE{POINT:2_A}
+{SAY:Habane, STATE:tsundere}: "W-whatever. It's not like I care if you're here or not. Just... don't be loud."
+JUMP{3}
+
+// Branch 2B
+SCENE{POINT:2_B}
+{SAY:Habane, STATE:mad1}: "What? I don't own the rooftop. Sit wherever you want, I guess. ...Just not too close."
+JUMP{3}
+
+// --- POINT 3: Library After School ---
+SCENE{POINT:3, LOCATION: Library, CHARACTERS: [center(Akagi.r)]}
+CLEAR
+{SAY:Akagi, STATE:default}: "..."
+{SAY:Akagi, STATE:default}: "(She seems to be completely focused on her book.)"
+{SAY:Akagi, STATE:shocked}: "Oh! Hello. I didn't see you there. I was just... lost in this chapter."
+
+
+CHAPTER{c1_1a}
