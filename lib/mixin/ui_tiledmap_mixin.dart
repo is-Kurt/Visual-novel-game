@@ -9,7 +9,6 @@ import 'package:helloworld_hellolove/helloworld_hellolove.dart';
 import 'package:flutter/foundation.dart';
 import 'package:helloworld_hellolove/screens/home_screen.dart';
 import 'package:helloworld_hellolove/screens/load_game_screen/load_game_screen.dart';
-import 'package:helloworld_hellolove/screens/settings_overlay.dart';
 import 'package:helloworld_hellolove/utils/rounded_rectangle.dart';
 import 'package:helloworld_hellolove/utils/tappable_input_text_box.dart';
 

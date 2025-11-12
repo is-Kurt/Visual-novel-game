@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui'; // <-- ADD THIS IMPORT
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
