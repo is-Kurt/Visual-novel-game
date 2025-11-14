@@ -74,7 +74,8 @@ flutter:
     - assets/chapters/
     - assets/images/HUD/
     - assets/tiles/
-    - assets/audio/
+    - assets/audio/bgm/
+    - assets/audio/sfx/
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

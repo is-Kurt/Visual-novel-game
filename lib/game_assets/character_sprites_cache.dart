@@ -17,7 +17,20 @@ class CharacterSpriteManager {
     ),
     'Habane': CharacterMetaData(
       fullName: 'Habane Akari',
-      states: ['concerned', 'crying1', 'crying2', 'crying3', 'default', 'disappointed', 'mad1', 'mad2', 'sad', 'shocked', 'smug', 'tsundere'],
+      states: [
+        'concerned',
+        'crying1',
+        'crying2',
+        'crying3',
+        'default',
+        'disappointed',
+        'mad1',
+        'mad2',
+        'sad',
+        'shocked',
+        'smug',
+        'tsundere',
+      ],
       size: Vector2.all(900),
     ),
     'Hotaru': CharacterMetaData(

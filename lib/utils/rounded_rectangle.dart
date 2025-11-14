@@ -14,7 +14,7 @@ class RoundedBoxComponent extends PositionComponent {
   final double? bottomLeftRadius;
   final double? bottomRightRadius;
 
-  final double? borderWidth;
+  double? borderWidth;
 
   // NEW: Per-side borders
   final bool borderTop;

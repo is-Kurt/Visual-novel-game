@@ -55,7 +55,9 @@ class SaveManager {
       return GameSave.fromJson(jsonMap);
     } catch (e) {
       // Handle errors (e.g., file not found, corrupt JSON)
-      print('Error loading game $fileName: $e');
+      if (kDebugMode) {
+        print('Error loading game $fileName: $e');
+      }
       return null;
     }
   }

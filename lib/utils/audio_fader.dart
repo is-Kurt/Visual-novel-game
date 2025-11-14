@@ -34,7 +34,6 @@ class AudioFaderComponent extends Component {
     final newVolume = lerpDouble(_startVolume, targetVolume, progress)!;
     player.setVolume(newVolume);
 
-    // When done, clean up
     if (progress == 1.0) {
       onComplete?.call();
       removeFromParent();

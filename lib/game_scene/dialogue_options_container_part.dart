@@ -42,21 +42,15 @@ extension DialogueOptionsPart on Scene {
     }
 
     // Remove decision event audio
-    await game.minigameAudioPlayer?.stop();
-    game.minigameAudioPlayer = null;
-
     if (game.minigameAudioPlayer != null) {
-      game.fadeAudio(game.minigameAudioPlayer!, 0.0, 0.5, () {
-        game.minigameAudioPlayer!.stop();
+      game.fadeAudio(game.minigameAudioPlayer!, 0.0, 1, () {
+        game.minigameAudioPlayer?.stop();
         game.minigameAudioPlayer = null;
       });
     }
 
-    FlameAudio.bgm.audioPlayer.setVolume(0.0);
     FlameAudio.bgm.resume();
-
-    game.fadeAudio(FlameAudio.bgm.audioPlayer, game.masterVolume * game.musicVolume, 0.5);
-
+    game.fadeAudio(FlameAudio.bgm.audioPlayer, game.masterVolume * game.musicVolume, .5);
     advanceScript();
   }
 

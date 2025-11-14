@@ -1,16 +1,16 @@
+import 'dart:io' show Platform; // For checking the platform
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/input.dart';
 import 'package:flame/text.dart';
 import 'package:flutter/painting.dart';
-import 'package:helloworld_hellolove/game_scene/scene.dart';
 import 'package:helloworld_hellolove/helloworld_hellolove.dart';
 import 'package:helloworld_hellolove/utils/rounded_rectangle.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flame_audio/flame_audio.dart'; // Import for FlameAudio
+import 'package:window_manager/window_manager.dart'; // For fullscreen toggle
 
 class SettingsOverlay {
-  // 1. ADD A VARIABLE TO HOLD THE GAME INSTANCE
   final HelloworldHellolove game;
 
   final settingsContainerSize = Vector2(
@@ -24,23 +24,30 @@ class SettingsOverlay {
   late double settingsComponentWidth;
   double topPadding = 0;
 
-  double masterVolume = 100; // These are 0-100
+  // These are 0-100 values for the UI
+  double masterVolume = 100;
   double musicVolume = 100;
   double sfxVolume = 100;
   double textSpeed = 50;
+  bool isFullScreen = false;
 
   late SharedPreferences prefs;
 
-  // 2. ADD A CONSTRUCTOR TO RECEIVE THE GAME
   SettingsOverlay({required this.game});
 
   Future<void> initialize() async {
     prefs = await SharedPreferences.getInstance();
 
+    // Load 0.0-1.0 values from prefs and convert to 0-100 for sliders
     masterVolume = (prefs.getDouble('masterVolume') ?? 1.0) * 100;
     musicVolume = (prefs.getDouble('musicVolume') ?? 1.0) * 100;
     sfxVolume = (prefs.getDouble('sfxVolume') ?? 1.0) * 100;
     textSpeed = prefs.getDouble('textSpeed') ?? 50;
+
+    // Load fullscreen setting
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      isFullScreen = prefs.getBool('isFullScreen') ?? false;
+    }
   }
 
   Future<ButtonComponent> openSettings([VoidCallback? onDismount]) async {
@@ -71,17 +78,17 @@ class SettingsOverlay {
 
     settingsContainer.add(createtextLabel('Volume'));
 
+    // --- MASTER VOLUME ---
     settingsContainer.add(
       createSlider(masterVolume, 'Master volume', (newValue) {
         masterVolume = newValue;
         // Update live for preview
         game.masterVolume = masterVolume / 100.0;
         FlameAudio.bgm.audioPlayer.setVolume(game.musicVolume * game.masterVolume);
-        if (game.minigameAudioPlayer != null) {
-          game.minigameAudioPlayer!.setVolume(game.sfxVolume * game.masterVolume);
-        }
+        game.minigameAudioPlayer?.setVolume(game.sfxVolume * game.masterVolume);
       }),
     );
+    // --- MUSIC VOLUME ---
     settingsContainer.add(
       createSlider(musicVolume, 'Music volume', (newValue) {
         musicVolume = newValue;
@@ -90,14 +97,13 @@ class SettingsOverlay {
         FlameAudio.bgm.audioPlayer.setVolume(game.musicVolume * game.masterVolume);
       }),
     );
+    // --- SFX VOLUME ---
     settingsContainer.add(
       createSlider(sfxVolume, 'SFX volume', (newValue) {
         sfxVolume = newValue;
         // Update live for preview
         game.sfxVolume = sfxVolume / 100.0;
-        if (game.minigameAudioPlayer != null) {
-          game.minigameAudioPlayer!.setVolume(game.sfxVolume * game.masterVolume);
-        }
+        game.minigameAudioPlayer?.setVolume(game.sfxVolume * game.masterVolume);
       }),
     );
 
@@ -108,19 +114,48 @@ class SettingsOverlay {
       }),
     );
 
-    topPadding += 100;
+    // --- FULLSCREEN TOGGLE (DESKTOP ONLY) ---
+    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      settingsContainer.add(createtextLabel('Display'));
+
+      topPadding += 60;
+
+      // --- NEW: Create the ToggleSwitch ---
+      final toggleSwitch = ToggleSwitch(
+        initialValue: isFullScreen,
+        onChanged: (newValue) async {
+          // This is called when the switch is tapped
+          isFullScreen = newValue;
+        },
+        position: Vector2(0, topPadding),
+        anchor: Anchor.centerLeft,
+        width: settingsComponentWidth * 0.7, // Make it a good size
+      );
+
+      settingsContainer.add(toggleSwitch);
+    }
+
+    topPadding += 70;
+    // --- SAVE BUTTON ---
     settingsContainer.add(
       addButtons('Save', settingsContainerSize.x * 0.2, () async {
+        // Save all values
         await prefs.setDouble('masterVolume', masterVolume / 100.0);
         await prefs.setDouble('musicVolume', musicVolume / 100.0);
         await prefs.setDouble('sfxVolume', sfxVolume / 100.0);
         await prefs.setDouble('textSpeed', textSpeed);
 
-        game.loadSettings();
+        if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+          await prefs.setBool('isFullScreen', isFullScreen);
+        }
+
+        // Apply settings to game
+        await game.loadSettings();
         settingsScrim.removeFromParent();
       }),
     );
 
+    // --- EXIT BUTTON ---
     settingsContainer.add(
       addButtons('Exit', (settingsContainerSize.x * 0.8) - (settingsComponentWidth * 0.2), () async {
         await game.loadSettings();
@@ -167,7 +202,7 @@ class SettingsOverlay {
   }
 
   RoundedBoxComponent createtextLabel(String text) {
-    topPadding += 100;
+    topPadding += 90;
 
     final textContainter = RoundedBoxComponent(
       size: Vector2(settingsComponentWidth, settingsContainerSize.y * 0.1),
@@ -192,7 +227,7 @@ class SettingsOverlay {
     return textContainter;
   }
 
-  PositionComponent createSlider(double initialVolume, String name, Function(double) onUpdate) {
+  PositionComponent createSlider(double initialValue, String name, Function(double) onUpdate) {
     topPadding += 60;
 
     final volumeContainer = PositionComponent(
@@ -209,7 +244,7 @@ class SettingsOverlay {
     const inactiveTrackColor = Color.fromARGB(250, 242, 195, 205); // White from image
 
     final TextComponent volumeText = TextComponent(
-      text: '$name: ${initialVolume.toStringAsFixed(0)}%',
+      text: '$name: ${initialValue.toStringAsFixed(0)}%',
       textRenderer: TextPaint(
         style: const TextStyle(fontFamily: 'Knewave', fontSize: 32.0, color: Color.fromARGB(250, 242, 195, 205)),
       ),
@@ -218,7 +253,7 @@ class SettingsOverlay {
     volumeContainer.add(volumeText);
 
     final slider = VolumeSlider(
-      initialValue: initialVolume / 100.0,
+      initialValue: initialValue / 100.0,
       onChanged: (newSliderValue) {
         final newVolume = newSliderValue * 100;
         onUpdate(newVolume);
@@ -238,6 +273,9 @@ class SettingsOverlay {
   }
 }
 
+// ---------------------------------------------------------------------
+// --- HELPER COMPONENT: VolumeSlider ---
+// ---------------------------------------------------------------------
 class VolumeSlider extends PositionComponent with DragCallbacks, TapCallbacks {
   double _value;
   final Function(double) onChanged;
@@ -269,7 +307,6 @@ class VolumeSlider extends PositionComponent with DragCallbacks, TapCallbacks {
     final trackWidth = size.x - thumbRadius * 2;
     final trackY = (size.y - trackHeight) / 2;
 
-    // 1. Inactive Track (Background)
     _trackBg = RoundedBoxComponent(
       size: Vector2(trackWidth, trackHeight),
       position: Vector2(thumbRadius, trackY),
@@ -277,7 +314,6 @@ class VolumeSlider extends PositionComponent with DragCallbacks, TapCallbacks {
       borderRadius: trackHeight / 2,
     );
 
-    // 2. Active Track (Foreground)
     _trackFg = RoundedBoxComponent(
       size: Vector2(trackWidth, trackHeight),
       position: Vector2(thumbRadius, trackY),
@@ -287,37 +323,26 @@ class VolumeSlider extends PositionComponent with DragCallbacks, TapCallbacks {
       borderWidth: 5,
     );
 
-    // 3. Thumb
     _thumb = CircleComponent(
       radius: thumbRadius,
       paint: Paint()..color = activeTrackColor,
       anchor: Anchor.center,
-      position: Vector2(0, size.y / 2), // Initial position set by _updateVisuals
+      position: Vector2(0, size.y / 2),
     );
 
     await addAll([_trackBg, _trackFg, _thumb]);
-    _updateVisuals(); // Set initial visual state
+    _updateVisuals();
   }
-
-  // --- Visual Update Logic ---
 
   void _updateVisuals() {
-    // Update thumb position
     final thumbX = thumbRadius + _value * (size.x - thumbRadius * 2);
     _thumb.position.x = thumbX;
-
-    // Update active track width by resizing the component
-    final clipWidth = _value * _trackBg.size.x;
-    _trackFg.size.x = clipWidth;
+    _trackFg.size.x = _value * _trackBg.size.x;
   }
-
-  // --- Input Handling ---
 
   void _updateValueFromPosition(double localX) {
     final trackStart = thumbRadius;
     final trackWidth = size.x - thumbRadius * 2;
-
-    // Calculate the value based on the tap/drag position
     final newRawValue = (localX - trackStart) / trackWidth;
     final newValue = newRawValue.clamp(0.0, 1.0);
 
@@ -348,6 +373,9 @@ class VolumeSlider extends PositionComponent with DragCallbacks, TapCallbacks {
   }
 }
 
+// ---------------------------------------------------------------------
+// --- HELPER COMPONENT: _ScrimButtonComponent ---
+// ---------------------------------------------------------------------
 class _ScrimButtonComponent extends ButtonComponent {
   final VoidCallback? onDismount;
   _ScrimButtonComponent({
@@ -362,5 +390,116 @@ class _ScrimButtonComponent extends ButtonComponent {
   void onRemove() {
     onDismount?.call();
     super.onRemove();
+  }
+}
+
+// ---------------------------------------------------------------------
+// --- NEW HELPER COMPONENT: ToggleSwitch ---
+// ---------------------------------------------------------------------
+class ToggleSwitch extends PositionComponent with TapCallbacks {
+  bool _value;
+  final Function(bool) onChanged;
+
+  late RoundedBoxComponent _trackInactive;
+  late RoundedBoxComponent _trackActive;
+  late RoundedBoxComponent _knob;
+
+  final double _padding = 5.0;
+  final Color _activeColor = const Color.fromARGB(255, 146, 50, 72);
+  final Color _inactiveColor = const Color.fromARGB(250, 242, 195, 205);
+  final TextStyle _textStyle = const TextStyle(
+    fontFamily: 'Knewave',
+    fontSize: 32.0,
+    color: Color.fromARGB(250, 242, 195, 205),
+  );
+
+  bool get value => _value;
+
+  ToggleSwitch({
+    required bool initialValue,
+    required this.onChanged,
+    required double width,
+    super.position,
+    super.anchor,
+  }) : _value = initialValue,
+       super(size: Vector2(width, 50)); // Set a fixed height
+
+  @override
+  Future<void> onLoad() async {
+    final double trackWidth = 100.0; // Width of the switch itself
+    final double trackHeight = 40.0;
+    final double knobSize = trackHeight + _padding;
+
+    // --- Labels ---
+    final windowLabel = TextComponent(
+      text: 'Window',
+      textRenderer: TextPaint(style: _textStyle),
+      anchor: Anchor.centerRight,
+      position: Vector2(size.x / 2 - trackWidth / 2 - 20, size.y / 2),
+    );
+
+    final fullscreenLabel = TextComponent(
+      text: 'Fullscreen',
+      textRenderer: TextPaint(style: _textStyle),
+      anchor: Anchor.centerLeft,
+      position: Vector2(size.x / 2 + trackWidth / 2 + 20, size.y / 2),
+    );
+
+    // --- Switch Components ---
+    _trackInactive = RoundedBoxComponent(
+      size: Vector2(trackWidth, trackHeight),
+      fillPaint: Paint()..color = _inactiveColor,
+      borderRadius: trackHeight / 2,
+      position: Vector2(size.x / 2, size.y / 2),
+      anchor: Anchor.center,
+    );
+
+    _trackActive = RoundedBoxComponent(
+      size: Vector2(trackWidth + 10, trackHeight),
+      fillPaint: Paint()..color = _activeColor,
+      borderRadius: trackHeight / 2,
+      borderPaint: Paint()..color = const Color.fromARGB(250, 242, 195, 205),
+    );
+
+    _knob = RoundedBoxComponent(
+      size: Vector2.all(knobSize),
+      fillPaint: Paint()..color = const Color.fromARGB(255, 146, 50, 72),
+      borderRadius: knobSize / 2,
+      boxShadow: BoxShadow(color: Color.fromARGB(90, 0, 0, 0), blurRadius: 1.0, offset: Offset(0, 4)),
+      position: Vector2(0, (knobSize / 2) - _padding / 2),
+      anchor: Anchor.center,
+    );
+
+    // Add children
+    await add(windowLabel);
+    await add(fullscreenLabel);
+    await add(_trackInactive);
+    // Add active track and knob as children of the *inactive* track
+    // so their positions are relative to it.
+    await _trackInactive.add(_trackActive);
+    await _trackInactive.add(_knob);
+
+    _updateVisuals(false); // Set initial state
+  }
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    _value = !_value;
+    onChanged(_value);
+    _updateVisuals(true);
+  }
+
+  void _updateVisuals(bool animate) {
+    if (_value) {
+      // ON (Fullscreen)
+      _trackActive.size.x = _trackInactive.size.x; // Fill
+      _trackActive.borderWidth = 10;
+      _knob.position.x = _trackInactive.size.x - (_knob.size.x / 2) - _padding + 10;
+    } else {
+      // OFF (Window)
+      _trackActive.size.x = 0; // Empty
+      _trackActive.borderWidth = 0;
+      _knob.position.x = (_knob.size.x / 2) + _padding - 10;
+    }
   }
 }

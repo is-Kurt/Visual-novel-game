@@ -11,6 +11,7 @@ enum FacingAt { left, right }
 class CharacterData extends SpriteComponent {
   late final List<String> states;
   late final String name;
+  // late final String fullName;
   late PositionAt positionAt;
   String state;
   FacingAt facingAt;
@@ -18,6 +19,7 @@ class CharacterData extends SpriteComponent {
   CharacterData({
     required this.states,
     required this.name,
+    // required this.fullName,
     required super.size,
     this.facingAt = FacingAt.right,
     this.positionAt = PositionAt.center,

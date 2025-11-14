@@ -17,7 +17,7 @@ extension ParseCommandsPart on Scene {
     // --- CHECK for CLEAR COMMAND ---
     if (_clear(line)) return;
 
-    // --- CHECK gor CHAPTER COMMAND ---
+    // --- CHECK for CHAPTER COMMAND ---
     if (_chapter(line)) return;
 
     // --- Handle other commands or errors ---
@@ -33,16 +33,26 @@ extension ParseCommandsPart on Scene {
       return true;
     }
 
-    final RegExp sceneRegex = RegExp(r'SCENE\{\s*LOCATION:\s*([^,]+),\s*CHARACTERS:\s*\[(.*)\]\s*\}$');
+    final RegExp sceneRegex = RegExp(
+      r'SCENE\{\s*LOCATION:\s*([^,]+)\s*,\s*CHARACTERS:\s*\[(.*?)\]\s*,\s*BGM:\s*([^}]+)\s*\}$',
+    );
     final sceneMatch = sceneRegex.firstMatch(line.trim());
 
     if (sceneMatch != null) {
       final String locationName = sceneMatch.group(1)!.trim();
       final String charactersString = sceneMatch.group(2)!.trim();
+      final String bgm = sceneMatch.group(3)!.trim();
 
       currentLocation = locationName; // SAVE game property
       currentPoint = currentLineIndex; // Save game property
 
+      bool isBgmLoaded = FlameAudio.audioCache.loadedFiles.keys.any((key) => key == 'bgm/$bgm.wav');
+
+      if (game.currentbgm != bgm && isBgmLoaded) {
+        print(bgm);
+        await FlameAudio.bgm.play('bgm/$bgm.wav', volume: game.masterVolume * game.musicVolume);
+        game.currentbgm = bgm;
+      }
       final List<(String, CharacterData)> characters = _parseCharacters(charactersString);
 
       await _setScene(locationName, characters);
@@ -60,15 +70,14 @@ extension ParseCommandsPart on Scene {
     if (decisionMatch != null) {
       // Add decision event audio
       if (game.playSounds) {
-        game.fadeAudio(FlameAudio.bgm.audioPlayer, 0.0, 0.5, () {
+        game.fadeAudio(FlameAudio.bgm.audioPlayer, 0.0, 1, () {
           FlameAudio.bgm.pause();
         });
 
-        game.minigameAudioPlayer = await FlameAudio.loop('Minigame OST.wav', volume: 0.0);
-
-        if (game.minigameAudioPlayer != null) {
-          game.fadeAudio(game.minigameAudioPlayer!, game.sfxVolume * game.masterVolume, 0.5);
-        }
+        game.minigameAudioPlayer = await FlameAudio.loop(
+          'sfx/Minigame OST.wav',
+          volume: game.sfxVolume * game.masterVolume,
+        );
       }
 
       final String optionsStr = decisionMatch.group(1)!; // "a:Yes, b:No, ..."
@@ -101,6 +110,7 @@ extension ParseCommandsPart on Scene {
 
       String speaker = '';
       String state = '';
+      String sfx = '';
 
       for (final cmdStr in commandList) {
         final parts = cmdStr.split(':');
@@ -112,6 +122,8 @@ extension ParseCommandsPart on Scene {
             speaker = value;
           } else if (command == 'STATE') {
             state = value;
+          } else if (command == 'SFX') {
+            sfx = value; // SFX is now optional
           }
         }
       }
@@ -119,6 +131,9 @@ extension ParseCommandsPart on Scene {
       if (speaker.isNotEmpty) {
         if (state.isNotEmpty) {
           handleState(speaker, state);
+        }
+        if (sfx.isNotEmpty) {
+          handleSFX(sfx); // You'll need to implement this function
         }
         greyAllChar();
         _startTyping(speaker, text);
@@ -175,6 +190,14 @@ extension ParseCommandsPart on Scene {
     } else {
       throw ('ERROR: Sprite for $charName not found on screen');
     }
+  }
+
+  void handleSFX(String sfx) async {
+    if (game.characterSFX != null) {
+      await game.characterSFX!.stop();
+      game.characterSFX = null;
+    }
+    game.characterSFX = await FlameAudio.play('sfx/$sfx.wav', volume: game.sfxVolume * game.masterVolume);
   }
 
   void clearScene() {

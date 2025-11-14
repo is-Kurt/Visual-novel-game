@@ -1,5 +1,5 @@
 // --- POINT 1: The Classroom ---
-SCENE{POINT:1, LOCATION: Classroom1 (Day), CHARACTERS: [right(Hotaru.l)]}
+SCENE{POINT:1, LOCATION: Classroom1 (Day), CHARACTERS: [right(Hotaru.l)], BGM: Park or Sad}
 
 CLEAR
 {SAY:PLAYER}: "My name is PLAYER and PLAYER is my name"
@@ -21,7 +21,7 @@ SCENE{POINT:1_B}
 JUMP{2}
 
 // --- POINT 2: Rooftop Lunch ---
-SCENE{POINT:2, LOCATION: School Rooftop (Day), CHARACTERS: [left(Habane.r), right(Hotaru.l)]}
+SCENE{POINT:2, LOCATION: School Rooftop (Day), CHARACTERS: [left(Habane.r), right(Hotaru.l)], BGM: Park or Sad}
 CLEAR
 {SAY:Hotaru, STATE:smile}: "See? Isn't this great? The view is amazing!"
 {SAY:Habane, STATE:smug}: "Hmph. It's just a view. And it's crowded. Why did you bring them here?"
@@ -40,7 +40,7 @@ SCENE{POINT:2_B}
 JUMP{3}
 
 // --- POINT 3: Library After School ---
-SCENE{POINT:3, LOCATION: Library, CHARACTERS: [center(Akagi.r)]}
+SCENE{POINT:3, LOCATION: Library, CHARACTERS: [center(Akagi.r)], BGM: Park or Sad}
 CLEAR
 {SAY:Akagi, STATE:default}: "..."
 {SAY:Akagi, STATE:default}: "(She seems to be completely focused on her book.)"
@@ -61,7 +61,7 @@ SCENE{POINT:3_B}
 JUMP{4}
 
 // --- POINT 4: The Walk Home ---
-SCENE{POINT:4, LOCATION: Corridor2 (Night), CHARACTERS: [left(Hotaru.l), right(Akagi.r)]}
+SCENE{POINT:4, LOCATION: Corridor2 (Night), CHARACTERS: [left(Hotaru.l), right(Akagi.r)], BGM: Park or Sad}
 CLEAR
 {SAY:Hotaru, STATE:smile}: "Wow, I'm glad we all finished up at the same time! This is great!"
 {SAY:Akagi, STATE:smile}: "Yes, it's a pleasant coincidence."
@@ -70,14 +70,14 @@ CLEAR
 DECISION{4_A: "Go to the Cafe?", 4_B: "Take a walk in the Park?"}
 
 // Branch 4A: Cafe
-SCENE{POINT:4_A, LOCATION: Modern Cafe, CHARACTERS: [left(Hotaru.smile.r), right(Akagi.smile.l)]}
+SCENE{POINT:4_A, LOCATION: Modern Cafe, CHARACTERS: [left(Hotaru.smile.r), right(Akagi.smile.l)], BGM: Park or Sad}
 CLEAR
 {SAY:Hotaru, STATE:blushing}: "This place has the best parfaits! My treat!"
 {SAY:Akagi, STATE:smile}: "This is a lovely cafe. The atmosphere is very calming."
 JUMP{5}
 
 // Branch 4B: Park
-SCENE{POINT:4_B, LOCATION: Park (Day), CHARACTERS: [left(Akagi.smile.r), right(Hotaru.smile.l)]}
+SCENE{POINT:4_B, LOCATION: Park (Day), CHARACTERS: [left(Akagi.smile.r), right(Hotaru.smile.l)], BGM: Park or Sad}
 CLEAR
 {SAY:Akagi, STATE:smile}: "The air is so fresh here. It's a nice change from the library."
 {SAY:Hotaru, STATE:smile}: "Look! The swings are free! C'mon, Akagi-chan, race you!"
@@ -85,7 +85,7 @@ CLEAR
 JUMP{5}
 
 // --- POINT 5: The Bus Stop ---
-SCENE{POINT:5, LOCATION: Bus Station (Night), CHARACTERS: [center(Habane.tsundere.l)]}
+SCENE{POINT:5, LOCATION: Bus Station (Night), CHARACTERS: [center(Habane.tsundere.l)], BGM: Park or Sad}
 CLEAR
 {SAY:Habane, STATE:tsundere}: "Oh. It's you. ...Are you following me?"
 {SAY:Habane, STATE:default}: "I saw you with Akagi and Hotaru earlier. You're... popular, all of a sudden."

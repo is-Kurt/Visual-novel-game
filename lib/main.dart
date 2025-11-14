@@ -7,39 +7,27 @@ import 'dart:io' show Platform;
 import 'package:window_manager/window_manager.dart';
 
 void main() async {
+  final HelloworldHellolove game = HelloworldHellolove();
   WidgetsFlutterBinding.ensureInitialized();
 
   if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
     await windowManager.ensureInitialized();
-
-    WindowOptions windowOptions = const WindowOptions(
-      size: Size(1280, 720),
-      center: true,
-      backgroundColor: Colors.transparent,
-      skipTaskbar: false,
-      titleBarStyle: TitleBarStyle.normal,
-    );
-
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
+    windowManager.addListener(WindowManagerListener(game: game));
   } else {
+    // Mobile devices (no change here)
     await Flame.device.fullScreen();
     await Flame.device.setLandscape();
   }
 
-  MaterialGame game = MaterialGame();
-  runApp(game);
+  runApp(MaterialGame(game: game));
 }
 
 class MaterialGame extends StatelessWidget {
-  const MaterialGame({super.key});
+  final HelloworldHellolove game;
+  const MaterialGame({super.key, required this.game});
 
   @override
   Widget build(BuildContext context) {
-    final HelloworldHellolove game = HelloworldHellolove();
-
     return MaterialApp(
       home: Scaffold(
         resizeToAvoidBottomInset: false,

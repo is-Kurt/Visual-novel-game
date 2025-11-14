@@ -39,17 +39,21 @@ extension SkipOrAdvanceLogic on Scene {
   }
 
   void _startTyping(String speaker, String text) {
-    late String fullName;
-    if (speaker.toUpperCase() == 'PLAYER') {
-      fullName = playerName;
-    } else {
-      _characterSprites[speaker]!.greydOut(false);
-      fullName = _characterSprites[speaker]!.name;
-    }
-
+    late String finalText;
     String modifiedText = text.replaceAll("PLAYER", playerName);
 
-    _fullText = '$fullName: $modifiedText';
+    if (speaker == 'PLAYER') {
+      finalText = '$playerName: $modifiedText';
+    } else if (speaker == 'NARRATOR') {
+      finalText = modifiedText;
+    } else {
+      _characterSprites[speaker]!.greydOut(false);
+
+      final fullName = _characterSprites[speaker]!.name;
+      finalText = '$fullName: $modifiedText';
+    }
+
+    _fullText = finalText;
     currentText = _fullText; // SAVE game property
     _charIndex = 0;
     _timer = 0.0;
